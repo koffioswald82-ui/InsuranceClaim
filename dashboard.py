@@ -152,7 +152,7 @@ avg_lr_kpis = float(claims_raw["montant_indemnise"].sum() / _declare * 100) if _
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 
-st.title("AXA Claims Lakehouse — Dashboard")
+st.title("AXA Claims Lakehouse - Dashboard")
 st.caption(
     f"{n_claims:,} claims  |  {len(fraud):,} fraud assessments  |  "
     f"{len(churn_raw):,} clients scored  |  "
