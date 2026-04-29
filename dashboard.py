@@ -353,22 +353,21 @@ with tab3:
 with tab4:
     lr_prod = (
         claims.groupby("produit")
-        .agg(losses=("montant_declare", "sum"), premiums=("prime_annuelle", "sum"))
-        .assign(loss_ratio=lambda d: d["losses"] / d["premiums"].replace(0, float("nan")) * 100)
-        .reset_index().sort_values("loss_ratio", ascending=False)
-        .dropna(subset=["loss_ratio"])
+        .agg(indemnise=("montant_indemnise", "sum"), declare=("montant_declare", "sum"))
+        .assign(rate=lambda d: d["indemnise"] / d["declare"].replace(0, float("nan")) * 100)
+        .reset_index().sort_values("rate", ascending=False)
+        .dropna(subset=["rate"])
     )
 
     col_a, col_b = st.columns(2)
     with col_a:
-        st.subheader("Loss Ratio by Product")
-        fig = px.bar(lr_prod, x="produit", y="loss_ratio",
-                     color="loss_ratio",
-                     color_continuous_scale=["#22c55e", "#f59e0b", "#ef4444"],
-                     text=lr_prod["loss_ratio"].map(lambda x: f"{x:.0f}%"),
-                     labels={"produit": "Product", "loss_ratio": "Loss Ratio (%)"})
-        fig.add_hline(y=100, line_dash="dash", line_color="red",
-                      annotation_text="100% threshold", annotation_position="top right")
+        st.subheader("Indemnification Rate by Product")
+        fig = px.bar(lr_prod, x="produit", y="rate",
+                     color="rate",
+                     color_continuous_scale=["#f59e0b", "#22c55e", "#22c55e"],
+                     text=lr_prod["rate"].map(lambda x: f"{x:.1f}%"),
+                     labels={"produit": "Product", "rate": "Indemnif. Rate (%)"},
+                     range_y=[0, 100])
         fig.update_layout(height=340, margin=dict(t=10, b=0), coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -553,19 +552,19 @@ with tab5:
                                       font=dict(size=11), tracegroupgap=2))
         st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("Loss Ratio by Region and Product")
+    st.subheader("Indemnification Rate by Region and Product")
     geo_lr = (
         claims.groupby(["region_nom", "produit"])
-        .agg(losses=("montant_declare", "sum"), premiums=("prime_annuelle", "sum"))
-        .assign(lr=lambda d: d["losses"] / d["premiums"].replace(0, float("nan")) * 100)
+        .agg(indemnise=("montant_indemnise", "sum"), declare=("montant_declare", "sum"))
+        .assign(lr=lambda d: d["indemnise"] / d["declare"].replace(0, float("nan")) * 100)
         .reset_index().dropna(subset=["lr"])
     )
     pivot_lr = geo_lr.pivot(index="region_nom", columns="produit", values="lr").fillna(float("nan")).round(1)
     fig = px.imshow(pivot_lr,
-                    color_continuous_scale=["#22c55e", "#f59e0b", "#ef4444"],
-                    aspect="auto", text_auto=".1f", zmin=0, zmax=150,
-                    labels={"color": "Loss Ratio (%)", "x": "Product", "y": "Region"},
-                    title="Loss Ratio % (Region x Product) - red = high risk")
+                    color_continuous_scale=["#f59e0b", "#22c55e", "#22c55e"],
+                    aspect="auto", text_auto=".1f", zmin=50, zmax=80,
+                    labels={"color": "Indemnif. Rate (%)", "x": "Product", "y": "Region"},
+                    title="Indemnification Rate % (Region x Product)")
     fig.update_layout(height=420, margin=dict(t=40, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
