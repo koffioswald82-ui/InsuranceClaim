@@ -1,4 +1,4 @@
-"""AXA Claims Lakehouse — Streamlit Dashboard.
+"""AXA Claims Lakehouse - Streamlit Dashboard.
 
 Reads Delta tables from lake/ (local) or exports/ (Streamlit Cloud).
 Developed by Oswald Jaures KOFFI.
@@ -168,7 +168,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 1 — Quality Report
+# TAB 1 - Quality Report
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab1:
@@ -181,7 +181,7 @@ with tab1:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Overview
+# TAB 2 - Overview
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab2:
@@ -251,7 +251,7 @@ with tab2:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — Fraud Detection
+# TAB 3 - Fraud Detection
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab3:
@@ -347,7 +347,7 @@ with tab3:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 4 — Portfolio
+# TAB 4 - Portfolio
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab4:
@@ -448,12 +448,12 @@ with tab4:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 5 — Geography
+# TAB 5 - Geography
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab5:
     st.caption(
-        "Cross-dimensional analysis: region × claim type and region × product — "
+        "Cross-dimensional analysis: region × claim type and region × product - "
         "identifies risk concentration zones and subscription dynamics."
     )
 
@@ -565,13 +565,13 @@ with tab5:
                     color_continuous_scale=["#22c55e", "#f59e0b", "#ef4444"],
                     aspect="auto", text_auto=".1f", zmin=0, zmax=150,
                     labels={"color": "Loss Ratio (%)", "x": "Product", "y": "Region"},
-                    title="Loss Ratio % (Region x Product) — red = high risk")
+                    title="Loss Ratio % (Region x Product) - red = high risk")
     fig.update_layout(height=420, margin=dict(t=40, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 6 — Churn
+# TAB 6 - Churn
 # ══════════════════════════════════════════════════════════════════════════════
 
 with tab6:

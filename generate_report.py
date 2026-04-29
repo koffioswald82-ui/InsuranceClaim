@@ -119,7 +119,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AXA Claims Lakehouse — Rapport Qualité</title>
+<title>AXA Claims Lakehouse - Rapport Qualité</title>
 <style>
   body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;margin:0;padding:24px;color:#111827}}
   h1{{font-size:24px;font-weight:700;margin:0 0 4px}}
@@ -138,7 +138,7 @@ html = f"""<!DOCTYPE html>
 </style>
 </head>
 <body>
-<h1>AXA Claims Lakehouse — Rapport Qualité</h1>
+<h1>AXA Claims Lakehouse - Rapport Qualité</h1>
 <div class="meta">Généré le {now} · Pipeline PySpark 3.5.1 + Delta Lake 3.1.0</div>
 
 <h2>KPIs Pipeline</h2>
@@ -152,7 +152,7 @@ html = f"""<!DOCTYPE html>
   {kpi_card("Délai déclaration", f"{avg_delai} j", "moyenne", "#8b5cf6")}
 </div>
 
-<h2>Qualité des données — Taux de nulls (colonnes critiques)</h2>
+<h2>Qualité des données - Taux de nulls (colonnes critiques)</h2>
 <div class="section">
 <table>
 <tr><th>Colonne</th><th>Taux de nulls</th><th>Statut</th><th>Visualisation</th></tr>
@@ -194,7 +194,7 @@ for r in produit_dist:
 html += f"""</table>
 </div>
 
-<h2>Détection de fraude — Distribution des scores</h2>
+<h2>Détection de fraude - Distribution des scores</h2>
 <div class="section">
 <table>
 <tr><th>Tranche de score</th><th>Sinistres</th><th>%</th><th>Volume</th></tr>
@@ -208,7 +208,7 @@ for i, r in enumerate(fraud_bins):
 html += f"""</table>
 </div>
 
-<h2>Score de churn — Segmentation clients</h2>
+<h2>Score de churn - Segmentation clients</h2>
 <div class="section">
 <table>
 <tr><th>Segment</th><th>Clients</th><th>%</th><th>Volume</th></tr>
