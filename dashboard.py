@@ -114,11 +114,11 @@ with st.sidebar:
         format_func=lambda r: region_labels.get(r, r),
     )
 
-    st.divider()
+    st.write("")
     mode = "Cloud (exports/)" if USE_EXPORTS else "Local (lake/)"
     st.caption(f"Source: {mode}")
     st.caption(f"Refreshed: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-    st.divider()
+    st.write("")
     st.markdown(
         "<div style='font-size:12px;color:#6b7280;text-align:center'>"
         "Developed by<br><b>Oswald Jaures KOFFI</b><br>"
@@ -147,7 +147,8 @@ n_policies  = claims["policy_id"].nunique()
 fraud_rate  = float(fraud["is_fraud_suspected"].mean() * 100) if len(fraud) else 0.0
 avg_amt     = claims["montant_declare"].mean()
 avg_delay   = claims["delai_declaration_jours"].mean()
-avg_lr_kpis = float(kpis_raw["loss_ratio"].mean() * 100) if len(kpis_raw) else 0.0
+_prem = claims_raw["prime_annuelle"].sum()
+avg_lr_kpis = float(claims_raw["montant_declare"].sum() / _prem * 100) if _prem > 0 else 0.0
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 
@@ -192,7 +193,7 @@ with tab2:
     c5.metric("Avg Claim Amount",  f"{avg_amt:,.0f} €" if pd.notna(avg_amt) else "-")
     c6.metric("Avg Filing Delay",  f"{avg_delay:.0f} d" if pd.notna(avg_delay) else "-")
 
-    st.divider()
+    st.write("")
     col_a, col_b = st.columns(2)
 
     with col_a:
@@ -263,7 +264,7 @@ with tab3:
     c2.metric("Suspected Fraud",  f"{n_suspects:,}", f"{fraud_rate:.1f}% of total")
     c3.metric("Avg Fraud Score",  f"{avg_score:.1f} / 100")
 
-    st.divider()
+    st.write("")
     col_a, col_b = st.columns(2)
 
     with col_a:
@@ -395,16 +396,16 @@ with tab4:
         lr_reg = (
             kpis_reg.groupby("region_nom")["loss_ratio"].mean()
             .reset_index(name="avg_lr")
-            .assign(lr_pct=lambda d: d["avg_lr"] * 100)
+            .assign(lr_pct=lambda d: d["avg_lr"])
             .sort_values("lr_pct", ascending=True)
         )
         fig = px.bar(lr_reg, x="lr_pct", y="region_nom", orientation="h",
                      color="lr_pct",
                      color_continuous_scale=["#22c55e", "#f59e0b", "#ef4444"],
-                     text=lr_reg["lr_pct"].map(lambda x: f"{x:.0f}%"),
-                     labels={"region_nom": "", "lr_pct": "Loss Ratio (%)"},
+                     text=lr_reg["lr_pct"].map(lambda x: f"{x:.1f}"),
+                     labels={"region_nom": "", "lr_pct": "Loss Ratio"},
                      title="Avg Loss Ratio by Region")
-        fig.add_vline(x=100, line_dash="dash", line_color="red")
+        fig.add_vline(x=1, line_dash="dash", line_color="red")
         fig.update_traces(textposition="outside")
         fig.update_layout(height=420, margin=dict(t=40, b=0), coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
@@ -441,7 +442,7 @@ with tab4:
                              .fillna(kpis_show["region_code"].astype(str)))
             kpis_show = kpis_show.drop(columns=["region_code"])
         if "loss_ratio" in kpis_show.columns:
-            kpis_show["loss_ratio"] = (kpis_show["loss_ratio"] * 100).round(1).astype(str) + " %"
+            kpis_show["loss_ratio"] = kpis_show["loss_ratio"].round(3).astype(str)
         st.dataframe(kpis_show.rename(columns={
             "canal_vente": "channel", "nb_polices": "policies",
             "nb_sinistres": "claims", "delai_moyen_declaration": "avg_filing_delay_d",
@@ -484,10 +485,12 @@ with tab5:
                      color="type_sinistre", orientation="h", barmode="stack",
                      category_orders={"region_nom": reg_order},
                      labels={"total_amount": "Total Amount (€)", "region_nom": "",
-                             "type_sinistre": "Claim Type"},
+                             "type_sinistre": ""},
                      title="Total Amount by Region, Breakdown by Type")
-        fig.update_layout(height=460, margin=dict(t=40, b=0), legend=dict(
-            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+        fig.update_layout(height=460, margin=dict(t=40, b=0, r=10),
+                          legend=dict(orientation="v", x=1.01, y=1,
+                                      xanchor="left", yanchor="top",
+                                      font=dict(size=11), tracegroupgap=2))
         st.plotly_chart(fig, use_container_width=True)
 
     col_c, col_d = st.columns(2)
@@ -516,7 +519,7 @@ with tab5:
             use_container_width=True, hide_index=True,
         )
 
-    st.divider()
+    st.write("")
     st.subheader("Insurance Subscription by Product and Region")
 
     geo_prod = (
@@ -545,10 +548,12 @@ with tab5:
                      color="produit", orientation="h", barmode="stack",
                      category_orders={"region_nom": reg_order_prod},
                      labels={"total_premium": "Annual Premium (€)", "region_nom": "",
-                             "produit": "Product"},
+                             "produit": ""},
                      title="Premiums by Region, Breakdown by Product")
-        fig.update_layout(height=420, margin=dict(t=40, b=0), legend=dict(
-            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+        fig.update_layout(height=420, margin=dict(t=40, b=0, r=10),
+                          legend=dict(orientation="v", x=1.01, y=1,
+                                      xanchor="left", yanchor="top",
+                                      font=dict(size=11), tracegroupgap=2))
         st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Loss Ratio by Region and Product")
@@ -584,7 +589,7 @@ with tab6:
     c3.metric("Critical Segment",  f"{n_critique:,}",
               f"{n_critique / len(churn) * 100:.1f}%" if len(churn) else "-")
 
-    st.divider()
+    st.write("")
     SEG_COLORS = {"critique": "#7c3aed", "eleve": "#ef4444",
                   "moyen": "#f59e0b",    "faible": "#22c55e"}
 
