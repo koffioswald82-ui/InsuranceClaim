@@ -32,9 +32,10 @@ n_fraud    = fraud.count()
 n_suspected = fraud.filter(F.col("is_fraud_suspected")).count()
 fraud_rate  = round(n_suspected / n_fraud * 100, 2) if n_fraud > 0 else 0
 
-# Loss ratio moyen
-avg_loss_ratio = kpis.select(F.mean("loss_ratio")).collect()[0][0]
-avg_loss_ratio = round(avg_loss_ratio * 100, 2) if avg_loss_ratio else 0
+# Taux d'indemnisation (montant indemnise / montant declare)
+_indemn = claims.select(F.sum("montant_indemnise")).collect()[0][0] or 0
+_declar = claims.select(F.sum("montant_declare")).collect()[0][0] or 1
+avg_loss_ratio = round(_indemn / _declar * 100, 2)
 
 # Montant moyen déclaré
 avg_montant = claims.select(F.mean("montant_declare")).collect()[0][0]
@@ -147,7 +148,7 @@ html = f"""<!DOCTYPE html>
   {kpi_card("Polices uniques", f"{n_policies:,}", "Silver policies")}
   {kpi_card("Clients", f"{n_clients:,}", "Silver clients")}
   {kpi_card("Taux de fraude", f"{fraud_rate}%", f"{n_suspected:,} suspects", "#ef4444")}
-  {kpi_card("Loss Ratio moyen", f"{avg_loss_ratio}%", "Gold KPIs", "#f59e0b")}
+  {kpi_card("Indemnif. Rate", f"{avg_loss_ratio}%", "indemnise/declare", "#f59e0b")}
   {kpi_card("Montant moyen", f"{avg_montant:,.0f} €", "montant_declare")}
   {kpi_card("Délai déclaration", f"{avg_delai} j", "moyenne", "#8b5cf6")}
 </div>
