@@ -7,3 +7,4 @@ font             = "sans serif"
 
 [server]
 headless = true
+# force redeploy Wed Apr 29 21:23:58 RST 2026
