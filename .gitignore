@@ -1,6 +1,9 @@
 # Delta Lake data (trop volumineux pour git — utiliser exports/ à la place)
 lake/
 
+# Données brutes volumineuses (présentes dans exports/ en snapshot)
+data/raw/
+
 # Python
 __pycache__/
 *.py[cod]
