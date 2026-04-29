@@ -114,11 +114,9 @@ with st.sidebar:
         format_func=lambda r: region_labels.get(r, r),
     )
 
-    st.write("")
     mode = "Cloud (exports/)" if USE_EXPORTS else "Local (lake/)"
     st.caption(f"Source: {mode}")
     st.caption(f"Refreshed: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-    st.write("")
     st.markdown(
         "<div style='font-size:12px;color:#6b7280;text-align:center'>"
         "Developed by<br><b>Oswald Jaures KOFFI</b><br>"
@@ -147,8 +145,13 @@ n_policies  = claims["policy_id"].nunique()
 fraud_rate  = float(fraud["is_fraud_suspected"].mean() * 100) if len(fraud) else 0.0
 avg_amt     = claims["montant_declare"].mean()
 avg_delay   = claims["delai_declaration_jours"].mean()
-_prem = claims_raw["prime_annuelle"].sum()
-avg_lr_kpis = float(claims_raw["montant_declare"].sum() / _prem * 100) if _prem > 0 else 0.0
+# Loss ratio par police unique (évite de compter la prime N fois pour N sinistres)
+_lr_per_policy = (
+    claims_raw.groupby("policy_id")
+    .agg(losses=("montant_declare", "sum"), premium=("prime_annuelle", "first"))
+    .assign(lr=lambda d: d["losses"] / d["premium"].replace(0, float("nan")))
+)
+avg_lr_kpis = float(_lr_per_policy["lr"].mean() * 100) if len(_lr_per_policy) else 0.0
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 
@@ -193,7 +196,6 @@ with tab2:
     c5.metric("Avg Claim Amount",  f"{avg_amt:,.0f} €" if pd.notna(avg_amt) else "-")
     c6.metric("Avg Filing Delay",  f"{avg_delay:.0f} d" if pd.notna(avg_delay) else "-")
 
-    st.write("")
     col_a, col_b = st.columns(2)
 
     with col_a:
@@ -264,7 +266,6 @@ with tab3:
     c2.metric("Suspected Fraud",  f"{n_suspects:,}", f"{fraud_rate:.1f}% of total")
     c3.metric("Avg Fraud Score",  f"{avg_score:.1f} / 100")
 
-    st.write("")
     col_a, col_b = st.columns(2)
 
     with col_a:
@@ -519,7 +520,6 @@ with tab5:
             use_container_width=True, hide_index=True,
         )
 
-    st.write("")
     st.subheader("Insurance Subscription by Product and Region")
 
     geo_prod = (
@@ -589,7 +589,6 @@ with tab6:
     c3.metric("Critical Segment",  f"{n_critique:,}",
               f"{n_critique / len(churn) * 100:.1f}%" if len(churn) else "-")
 
-    st.write("")
     SEG_COLORS = {"critique": "#7c3aed", "eleve": "#ef4444",
                   "moyen": "#f59e0b",    "faible": "#22c55e"}
 
