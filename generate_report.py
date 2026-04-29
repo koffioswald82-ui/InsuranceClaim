@@ -72,12 +72,16 @@ churn_dist = (
     .collect()
 )
 
-# Loss ratio par produit (top 5)
+# Taux d'indemnisation par produit (montant indemnise / montant declare)
 lr_by_produit = (
-    kpis.groupBy("produit")
-    .agg(F.mean("loss_ratio").alias("lr"))
+    claims
+    .groupBy("produit")
+    .agg(
+        F.sum("montant_indemnise").alias("indemn"),
+        F.sum("montant_declare").alias("declar"),
+    )
+    .withColumn("lr", F.col("indemn") / F.col("declar"))
     .orderBy("lr", ascending=False)
-    .limit(5)
     .collect()
 )
 
@@ -181,9 +185,9 @@ html += f"""</table>
 <h2>Répartition par produit</h2>
 <div class="section">
 <table>
-<tr><th>Produit</th><th>Sinistres</th><th>Loss Ratio moyen</th><th>Volume</th></tr>
+<tr><th>Produit</th><th>Sinistres</th><th>Indemnif. Rate</th><th>Volume</th></tr>
 """
-lr_map = {r["produit"]: round(r["lr"]*100, 1) for r in lr_by_produit}
+lr_map = {r["produit"]: round(float(r["lr"]) * 100, 1) for r in lr_by_produit if r["lr"] is not None}
 max_prod = max((r["count"] for r in produit_dist), default=1)
 for r in produit_dist:
     lr = lr_map.get(r["produit"], "-")
