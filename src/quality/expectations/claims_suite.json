@@ -1,0 +1,63 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "claims_bronze_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "claim_id" },
+      "meta": { "rule": "Critical PK" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": { "column": "claim_id" },
+      "meta": { "rule": "No duplicates" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "policy_id" },
+      "meta": { "rule": "FK integrity" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "client_id" },
+      "meta": { "rule": "FK integrity" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "statut",
+        "value_set": ["ouvert", "en_cours", "clos", "refuse", "en_litige", "inconnu"]
+      },
+      "meta": { "rule": "Statut valid values" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "montant_declare",
+        "min_value": 0,
+        "max_value": 10000000
+      },
+      "meta": { "rule": "Amount bounds" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_regex",
+      "kwargs": {
+        "column": "date_sinistre",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "meta": { "rule": "Date ISO 8601 format" }
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": { "min_value": 1, "max_value": 10000000 },
+      "meta": { "rule": "Non empty table" }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.15",
+    "created_by": "axa-claims-lakehouse",
+    "layer": "bronze",
+    "entity": "claims"
+  }
+}

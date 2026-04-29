@@ -1,0 +1,39 @@
+# Delta Lake data (trop volumineux pour git — utiliser exports/ à la place)
+lake/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environnements virtuels
+.env
+.venv
+env/
+venv/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spark / Hadoop logs
+derby.log
+metastore_db/
+spark-warehouse/

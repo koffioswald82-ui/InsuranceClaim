@@ -1,0 +1,167 @@
+{
+  "name": "PL_AXA_Claims_Lakehouse",
+  "properties": {
+    "description": "Pipeline principal AXA Claims Lakehouse — Bronze→Silver→Gold + Fraud + Churn",
+    "activities": [
+      {
+        "name": "GetMetadata_SourceFiles",
+        "type": "GetMetadata",
+        "dependsOn": [],
+        "policy": { "timeout": "0.00:10:00", "retry": 2 },
+        "typeProperties": {
+          "dataset": { "referenceName": "DS_ADLS_Raw", "type": "DatasetReference" },
+          "fieldList": ["exists", "lastModified", "size"],
+          "storeSettings": {
+            "type": "AzureBlobFSReadSettings",
+            "recursive": false
+          }
+        }
+      },
+      {
+        "name": "If_SourceFilesExist",
+        "type": "IfCondition",
+        "dependsOn": [
+          { "activity": "GetMetadata_SourceFiles", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "expression": {
+            "value": "@activity('GetMetadata_SourceFiles').output.exists",
+            "type": "Expression"
+          },
+          "ifTrueActivities": [
+            {
+              "name": "Copy_Claims_to_Bronze",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "0.01:00:00", "retry": 2, "retryIntervalInSeconds": 30 },
+              "typeProperties": {
+                "source": {
+                  "type": "DelimitedTextSource",
+                  "storeSettings": { "type": "AzureBlobFSReadSettings", "recursive": false },
+                  "formatSettings": { "type": "DelimitedTextReadSettings" }
+                },
+                "sink": {
+                  "type": "ParquetSink",
+                  "storeSettings": { "type": "AzureBlobFSWriteSettings" },
+                  "formatSettings": { "type": "ParquetWriteSettings" }
+                },
+                "enableStaging": false,
+                "parallelCopies": 4,
+                "dataIntegrationUnits": 8
+              },
+              "inputs": [{ "referenceName": "DS_CSV_Claims", "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Delta_Bronze_Claims", "type": "DatasetReference" }]
+            },
+            {
+              "name": "Copy_Policies_to_Bronze",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": { "timeout": "0.01:00:00", "retry": 2 },
+              "typeProperties": {
+                "source": { "type": "JsonSource" },
+                "sink": { "type": "ParquetSink" },
+                "enableStaging": false
+              },
+              "inputs": [{ "referenceName": "DS_JSON_Policies", "type": "DatasetReference" }],
+              "outputs": [{ "referenceName": "DS_Delta_Bronze_Policies", "type": "DatasetReference" }]
+            }
+          ],
+          "ifFalseActivities": [
+            {
+              "name": "Fail_NoSourceFiles",
+              "type": "Fail",
+              "typeProperties": {
+                "message": "Source files not found in ADLS container",
+                "errorCode": "SOURCE_NOT_FOUND"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Notebook_BronzeToSilver",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          { "activity": "If_SourceFilesExist", "dependencyConditions": ["Succeeded"] }
+        ],
+        "policy": { "timeout": "0.02:00:00", "retry": 1, "retryIntervalInSeconds": 60 },
+        "typeProperties": {
+          "notebookPath": "/Repos/axa-lakehouse/notebooks/bronze_to_silver",
+          "baseParameters": {
+            "batch_id":       { "value": "@pipeline().parameters.batch_date", "type": "Expression" },
+            "bronze_path":    { "value": "@pipeline().parameters.bronze_path", "type": "Expression" },
+            "silver_path":    { "value": "@pipeline().parameters.silver_path", "type": "Expression" }
+          },
+          "libraries": [
+            { "pypi": { "package": "delta-spark==3.1.0" } }
+          ]
+        },
+        "linkedServiceName": { "referenceName": "LS_Databricks", "type": "LinkedServiceReference" }
+      },
+      {
+        "name": "Notebook_SilverToGold",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          { "activity": "Notebook_BronzeToSilver", "dependencyConditions": ["Succeeded"] }
+        ],
+        "policy": { "timeout": "0.03:00:00", "retry": 1 },
+        "typeProperties": {
+          "notebookPath": "/Repos/axa-lakehouse/notebooks/silver_to_gold",
+          "baseParameters": {
+            "batch_id":     { "value": "@pipeline().parameters.batch_date", "type": "Expression" },
+            "silver_path":  { "value": "@pipeline().parameters.silver_path", "type": "Expression" },
+            "gold_path":    { "value": "@pipeline().parameters.gold_path", "type": "Expression" }
+          }
+        },
+        "linkedServiceName": { "referenceName": "LS_Databricks", "type": "LinkedServiceReference" }
+      },
+      {
+        "name": "Notebook_FraudDetection",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          { "activity": "Notebook_SilverToGold", "dependencyConditions": ["Succeeded"] }
+        ],
+        "policy": { "timeout": "0.02:00:00", "retry": 1 },
+        "typeProperties": {
+          "notebookPath": "/Repos/axa-lakehouse/notebooks/fraud_flags",
+          "baseParameters": {
+            "batch_id": { "value": "@pipeline().parameters.batch_date", "type": "Expression" }
+          }
+        },
+        "linkedServiceName": { "referenceName": "LS_Databricks", "type": "LinkedServiceReference" }
+      },
+      {
+        "name": "SP_AuditLog",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          { "activity": "Notebook_FraudDetection", "dependencyConditions": ["Succeeded"] }
+        ],
+        "policy": { "timeout": "0.00:05:00", "retry": 2 },
+        "typeProperties": {
+          "storedProcedureName": "[audit].[usp_log_pipeline_run]",
+          "storedProcedureParameters": {
+            "pipeline_name":   { "value": "PL_AXA_Claims_Lakehouse", "type": "String" },
+            "run_id":          { "value": "@pipeline().RunId", "type": "String" },
+            "batch_date":      { "value": "@pipeline().parameters.batch_date", "type": "String" },
+            "status":          { "value": "SUCCESS", "type": "String" },
+            "completed_at":    { "value": "@utcnow()", "type": "String" }
+          }
+        },
+        "linkedServiceName": { "referenceName": "LS_AzureSQL_Audit", "type": "LinkedServiceReference" }
+      }
+    ],
+    "parameters": {
+      "batch_date":   { "type": "String", "defaultValue": "@formatDateTime(utcnow(), 'yyyy-MM-dd')" },
+      "bronze_path":  { "type": "String", "defaultValue": "abfss://bronze@axadatalake.dfs.core.windows.net/" },
+      "silver_path":  { "type": "String", "defaultValue": "abfss://silver@axadatalake.dfs.core.windows.net/" },
+      "gold_path":    { "type": "String", "defaultValue": "abfss://gold@axadatalake.dfs.core.windows.net/" },
+      "environment":  { "type": "String", "defaultValue": "prod" }
+    },
+    "variables": {
+      "pipeline_run_id": { "type": "String" }
+    },
+    "annotations": ["insurance", "lakehouse", "claims", "v3"],
+    "lastPublishTime": "2024-01-01T00:00:00Z"
+  },
+  "type": "Microsoft.DataFactory/factories/pipelines"
+}

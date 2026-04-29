@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AXA Claims Lakehouse — Rapport Qualité</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;margin:0;padding:24px;color:#111827}
+  h1{font-size:24px;font-weight:700;margin:0 0 4px}
+  h2{font-size:16px;font-weight:600;margin:20px 0 12px;color:#374151;border-bottom:1px solid #e5e7eb;padding-bottom:6px}
+  .meta{font-size:13px;color:#6b7280;margin-bottom:24px}
+  .grid{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  th{background:#f9fafb;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;padding:10px 16px;text-align:left}
+  td{padding:10px 16px;font-size:14px;border-top:1px solid #f3f4f6}
+  tr:hover td{background:#f9fafb}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+  .ok{background:#dcfce7;color:#166534}
+  .warn{background:#fef9c3;color:#854d0e}
+  .err{background:#fee2e2;color:#991b1b}
+  .section{background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
+</style>
+</head>
+<body>
+<h1>AXA Claims Lakehouse — Rapport Qualité</h1>
+<div class="meta">Généré le 29/04/2026 14:40 · Pipeline PySpark 3.5.1 + Delta Lake 3.1.0</div>
+
+<h2>KPIs Pipeline</h2>
+<div class="grid">
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Sinistres Silver</div>
+      <div style="font-size:28px;font-weight:700;color:#3b82f6">120,000</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">après déduplication</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Polices uniques</div>
+      <div style="font-size:28px;font-weight:700;color:#3b82f6">80,000</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">Silver policies</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Clients</div>
+      <div style="font-size:28px;font-weight:700;color:#3b82f6">50,000</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">Silver clients</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Taux de fraude</div>
+      <div style="font-size:28px;font-weight:700;color:#ef4444">35.83%</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">42,992 suspects</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Loss Ratio moyen</div>
+      <div style="font-size:28px;font-weight:700;color:#f59e0b">189587.26%</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">Gold KPIs</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Montant moyen</div>
+      <div style="font-size:28px;font-weight:700;color:#3b82f6">43,131 €</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">montant_declare</div>
+    </div>
+  
+    <div style="background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px;flex:1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Délai déclaration</div>
+      <div style="font-size:28px;font-weight:700;color:#8b5cf6">36.6 j</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px">moyenne</div>
+    </div>
+</div>
+
+<h2>Qualité des données — Taux de nulls (colonnes critiques)</h2>
+<div class="section">
+<table>
+<tr><th>Colonne</th><th>Taux de nulls</th><th>Statut</th><th>Visualisation</th></tr>
+<tr><td><code>claim_id</code></td><td>0.0%</td><td><span class="badge ok">OK</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><code>policy_id</code></td><td>0.0%</td><td><span class="badge ok">OK</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><code>client_id</code></td><td>0.0%</td><td><span class="badge ok">OK</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><code>date_sinistre</code></td><td>0.0%</td><td><span class="badge ok">OK</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><code>montant_declare</code></td><td>0.0%</td><td><span class="badge ok">OK</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+</table>
+</div>
+
+<h2>Distribution des statuts sinistres</h2>
+<div class="section">
+<table>
+<tr><th>Statut</th><th>Nombre</th><th>% du total</th><th>Répartition</th></tr>
+<tr><td>clos</td><td>53,855</td><td>44.9%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:100.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>en_cours</td><td>24,124</td><td>20.1%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:44.8%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>ouvert</td><td>18,117</td><td>15.1%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:33.6%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>refuse</td><td>14,185</td><td>11.8%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:26.3%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>en_litige</td><td>9,719</td><td>8.1%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:18.0%;height:12px;border-radius:4px"></div></div></td></tr>
+</table>
+</div>
+
+<h2>Répartition par produit</h2>
+<div class="section">
+<table>
+<tr><th>Produit</th><th>Sinistres</th><th>Loss Ratio moyen</th><th>Volume</th></tr>
+<tr><td>auto</td><td>35,901</td><td><span class="badge" style="background:#dbeafe;color:#1e40af">69938.6%</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:100.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>habitation</td><td>29,910</td><td><span class="badge" style="background:#dbeafe;color:#1e40af">207615.1%</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:83.3%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>sante</td><td>24,228</td><td><span class="badge" style="background:#dbeafe;color:#1e40af">10144.5%</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:67.5%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>vie</td><td>17,778</td><td><span class="badge" style="background:#dbeafe;color:#1e40af">532104.4%</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:49.5%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>mrh</td><td>12,183</td><td><span class="badge" style="background:#dbeafe;color:#1e40af">132278.5%</span></td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#3b82f6;width:33.9%;height:12px;border-radius:4px"></div></div></td></tr>
+</table>
+</div>
+
+<h2>Détection de fraude — Distribution des scores</h2>
+<div class="section">
+<table>
+<tr><th>Tranche de score</th><th>Sinistres</th><th>%</th><th>Volume</th></tr>
+<tr><td>0 (aucun)</td><td>77,008</td><td>64.2%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:100.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>1-25 (faible)</td><td>39,747</td><td>33.1%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#84cc16;width:51.6%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>26-50 (moyen)</td><td>3,217</td><td>2.7%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#f59e0b;width:4.2%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td>51-75 (élevé)</td><td>28</td><td>0.0%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#ef4444;width:0.0%;height:12px;border-radius:4px"></div></div></td></tr>
+</table>
+</div>
+
+<h2>Score de churn — Segmentation clients</h2>
+<div class="section">
+<table>
+<tr><th>Segment</th><th>Clients</th><th>%</th><th>Volume</th></tr>
+<tr><td><span class="badge" style="background:#f59e0b22;color:#f59e0b">moyen</span></td><td>25,248</td><td>50.5%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#f59e0b;width:100.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><span class="badge" style="background:#22c55e22;color:#22c55e">faible</span></td><td>23,483</td><td>47.0%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#22c55e;width:93.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><span class="badge" style="background:#ef444422;color:#ef4444">élevé</span></td><td>1,252</td><td>2.5%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#ef4444;width:5.0%;height:12px;border-radius:4px"></div></div></td></tr>
+<tr><td><span class="badge" style="background:#7c3aed22;color:#7c3aed">critique</span></td><td>17</td><td>0.0%</td><td style="width:200px"><div style="background:#e5e7eb;border-radius:4px;height:12px;width:100%"><div style="background:#7c3aed;width:0.1%;height:12px;border-radius:4px"></div></div></td></tr>
+</table>
+</div>
+
+<div style="margin-top:32px;font-size:12px;color:#9ca3af;text-align:center">
+  AXA Claims Lakehouse · PySpark 3.5.1 · Delta Lake 3.1.0 · Généré le 29/04/2026 14:40
+</div>
+</body>
+</html>
