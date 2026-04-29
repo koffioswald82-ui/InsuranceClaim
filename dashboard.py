@@ -136,7 +136,8 @@ claims = _add_region_nom(claims_raw[mask].copy(), INSEE)
 fraud_ids = set(claims["claim_id"].dropna())
 fraud = fraud_raw[fraud_raw["claim_id"].isin(fraud_ids)].copy()
 fraud = fraud.merge(
-    claims[["claim_id", "region_code", "region_nom"]], on="claim_id", how="left"
+    claims[["claim_id", "region_code", "region_nom"]].drop_duplicates("claim_id"),
+    on="claim_id", how="left"
 )
 
 # Global KPIs
@@ -145,13 +146,9 @@ n_policies  = claims["policy_id"].nunique()
 fraud_rate  = float(fraud["is_fraud_suspected"].mean() * 100) if len(fraud) else 0.0
 avg_amt     = claims["montant_declare"].mean()
 avg_delay   = claims["delai_declaration_jours"].mean()
-# Loss ratio par police unique (évite de compter la prime N fois pour N sinistres)
-_lr_per_policy = (
-    claims_raw.groupby("policy_id")
-    .agg(losses=("montant_declare", "sum"), premium=("prime_annuelle", "first"))
-    .assign(lr=lambda d: d["losses"] / d["premium"].replace(0, float("nan")))
-)
-avg_lr_kpis = float(_lr_per_policy["lr"].mean() * 100) if len(_lr_per_policy) else 0.0
+# Taux d'indemnisation : part du montant déclaré effectivement remboursé (plage réaliste 60-90%)
+_declare = claims_raw["montant_declare"].sum()
+avg_lr_kpis = float(claims_raw["montant_indemnise"].sum() / _declare * 100) if _declare > 0 else 0.0
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 
@@ -192,7 +189,7 @@ with tab2:
     c1.metric("Claims",            f"{n_claims:,}")
     c2.metric("Unique Policies",   f"{n_policies:,}")
     c3.metric("Fraud Rate",        f"{fraud_rate:.1f}%")
-    c4.metric("Avg Loss Ratio",    f"{avg_lr_kpis:.1f}%")
+    c4.metric("Indemnif. Rate",     f"{avg_lr_kpis:.1f}%")
     c5.metric("Avg Claim Amount",  f"{avg_amt:,.0f} €" if pd.notna(avg_amt) else "-")
     c6.metric("Avg Filing Delay",  f"{avg_delay:.0f} d" if pd.notna(avg_delay) else "-")
 
